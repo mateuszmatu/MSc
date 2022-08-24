@@ -86,13 +86,10 @@ class particle_grid_displacement:
             if i == 1 and backwards is True:
                 o.seed_elements(self.lons.ravel(), self.lats.ravel(), time=r.start_time+timedelta(hours=self.h))
                 o.run(duration=timedelta(hours=self.dur), time_step=timedelta(seconds=-self.ts), time_step_output=timedelta(hours=-self.dur), outfile=f'{self.path}/m{member}_b.nc')
-       
-        _f = xr.open_dataset(f'{self.path}/m{member}_f.nc')
-        _b = xr.open_dataset(f'{self.path}/m{member}_b.nc')
-        os.remove(f'{self.path}/m{member}_f.nc')
-        os.remove(f'{self.path}/m{member}_b.nc')
 
         if forwards is True:
+            _f = xr.open_dataset(f'{self.path}/m{member}_f.nc')
+            os.remove(f'{self.path}/m{member}_f.nc')
             values['f']['lon'] = np.array(_f['lon'][:,-1])
             values['f']['lat'] = np.array(_f['lat'][:,-1])
             if backwards is False:
@@ -100,6 +97,8 @@ class particle_grid_displacement:
                 values['b']['lat'] = np.zeros_like(_f['lat'][:,-1])
 
         if backwards is True:
+            _b = xr.open_dataset(f'{self.path}/m{member}_b.nc')
+            os.remove(f'{self.path}/m{member}_b.nc')
             values['b']['lon'] = np.array(_b['lon'][:,-1])
             values['b']['lat'] = np.array(_b['lat'][:,-1])
             if forwards is False:
@@ -119,6 +118,45 @@ class particle_grid_displacement:
         '''
         for i in range(num_of_members):
             self.displacement_one_member(i)
+    
+    def aggregated_displacement(self, start_time, at_time, outfile, par=True):
+        '''
+            Seeds particles using an aggregated dataset, so that they can be advected for a longer time.
+        Args:   
+            start_time  [list]  :   a list of the date [year, month, day, hour]
+            outfile     [str]   :   name of outfile
+            par         [bool]  :   if this is used in a method that uses a parallel loop (not really important)
+        Returns:
+            path        [str]   :   a string with path to file
+        '''
+
+        file = 'https://thredds.met.no/thredds/dodsC/fou-hi/barents_eps_zdepth_be'
+        st = datetime(start_time[0], start_time[1], start_time[2], start_time[3])
+
+        o = OceanDrift(loglevel=20)
+        r = reader_netCDF_CF_generic.Reader(file)
+        o.add_reader(r)
+        o.seed_elements(self.lons.ravel(), self.lats.ravel(), time=st+timedelta(hours=at_time))
+        o.run(duration=timedelta(hours=self.dur), time_step=-self.ts, time_step_output=timedelta(hours=self.dur), outfile=f'{outfile}.nc')
+
+        _b = xr.open_dataset(f'{outfile}.nc')
+        os.remove(f'{outfile}.nc')
+
+        values = self._set_up_dictionary
+
+        values['b']['lon'] = np.array(_b['lon'][:,-1])
+        values['b']['lat'] = np.array(_b['lat'][:,-1])
+        values['f']['lon'] = np.zeros_like(_b['lon'][:,-1])
+        values['f']['lat'] = np.zeros_like(_b['lat'][:,-1])
+
+        if par is True:
+            path = f'tmp/{outfile}.npy'
+            np.save(path, values)
+        elif par is False:
+            path = f'{outfile}.npy'
+            np.save(path)
+        return path
+
 
     
 if __name__ == '__main__':

@@ -45,7 +45,7 @@ def run_LCS():
         if not args.in_file:
             parser.error('Input file or URL is not specified')
         
-        from generate_files import initiate_files
+        from grid_advection import initiate_files
         initiate_files(args.longitude, args.latitude, args.time_step, args.delta, args.duration, args.in_file, args.out_file)
     
     if args.LCS:

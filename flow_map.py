@@ -15,7 +15,7 @@ def flow_map_all_members(path, fb='f'):
     for file in os.listdir(path):
         files.append(file)
     files.sort()
-    colors = cm.rainbow(np.linspace(0, 1, 24))
+    colors = cm.rainbow(np.linspace(0, 1, 6))
     m=0
     for file, c in zip(files, colors):
         data = np.load(f'{path}/{file}', allow_pickle='TRUE').item()
@@ -57,6 +57,33 @@ def flow_map_double_gyre(file):
 
     return lon[:,0], lat[:,0], lon[:,1], lat[:,1]
 
+def flow_map_selected_members(path, members = [0]):
+    transform = ccrs.NorthPolarStereo()
+    plate = ccrs.PlateCarree()
+    axs = plt.axes(projection = transform)
+    files = []
+    for member in members:
+        files.append(f'{path}values_m{member}.npy')
+    
+    files.sort()
+    colors = cm.rainbow(np.linspace(0, 1, len(members)))
+    m=0
+    for file, c in zip(files, colors):
+        data = np.load(f'{file}', allow_pickle='TRUE').item()
+        for time in range(1, 2):
+            lon = data['time'][1]['b']['lon']
+            lat = data['time'][1]['b']['lat']
+            plt.scatter(lon, lat, transform=plate, s=25, color=c, label=m)
+        m+=1
+    in_lon = data['initial_lon']
+    in_lat = data['initial_lat']
+    plt.scatter(in_lon, in_lat, transform=plate, color='black', label='Initial positions')
+    axs.add_feature(cartopy.feature.LAND, zorder=1, edgecolor='black')
+    plt.legend(bbox_to_anchor=(1,1), loc="upper left")
+    axs.gridlines(draw_labels=True)
+    axs.coastlines()
+    plt.savefig('flow_map.png')
+    
 if __name__ == '__main__':
     #flow_map_all_members('flow_maps/20220323/f/20220323_f')
-    flow_map_all_members('flow_maps/20220320/')
+    flow_map_selected_members('flow_maps/20220529/', [0,1,2,3,4,5])
