@@ -100,7 +100,6 @@ def double_gyre_velocity_field(at_time = 3, epsilon = 0.25, omega = 0.682, A = 0
         u           [arr]   :   an array containing the u velocities
         v           [arr]   :   an array containing the v velocities
         infor_str   [list]  :   a list containing the parameters used
-        
     '''
     a = epsilon*np.sin(omega*at_time)
     b = 1-2*epsilon*np.sin(omega*at_time)
@@ -123,11 +122,11 @@ if __name__ == '__main__':
     from LCS import FTLE
     LCS1 = FTLE(example_double_gyre(epsilon=0.25, A=0.1, omega=2*np.pi/10, at_time=0.5, forwards=False))
     LCS2 = FTLE(example_double_gyre(epsilon=0.25, A=0.1, omega=0.7, at_time=0.5, forwards=False))
-    LCS3 = FTLE(example_double_gyre(epsilon=0.25, A=0.12, omega=2*np.pi/10, at_time=0.5, forwards=False))
+    LCS3 = FTLE(example_double_gyre(epsilon=0.25, A=0.2, omega=2*np.pi/10, at_time=0.5, forwards=False))
 
     ex_1 = double_gyre_velocity_field(epsilon=0.25, A=0.1, omega=2*np.pi/10, at_time=0.5)
     ex_2 = double_gyre_velocity_field(epsilon=0.25, A=0.1, omega=0.7, at_time=0.5)
-    ex_3 = double_gyre_velocity_field(epsilon=0.25, A=0.12, omega=2*np.pi/10, at_time=0.5)
+    ex_3 = double_gyre_velocity_field(epsilon=0.25, A=0.2, omega=2*np.pi/10, at_time=0.5)
 
     fig, ax = plt.subplots(2,3, figsize=(6,12))
     #ax[0].pcolormesh(LCS['lon'], LCS['lat'], LCS['ALCS'], cmap='jet')

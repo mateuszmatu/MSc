@@ -1,5 +1,7 @@
 import os
 import re
+from datetime import datetime
+from datetime import timedelta
 
 def create_directory(date):
     '''
@@ -16,23 +18,32 @@ def create_directory(date):
         os.mkdir(path)
     return path
 
-def files_from_thredds(date):
+def files_from_thredds(date, file):
     '''
-        Find the threeds files from thredds_urls.txt from the specified date
+        Find the threeds files from {file}.txt from the previous day of the specified date.
     Args:
         date    [str]   :   the date from which files should be found
+        file    [str]   :   file with the urls
     Returns:
         arr     [list]  :   a list of the file names from the specified date
     '''
+    odate = datetime(int(date[0:4]), int(date[4:6]), int(date[6:8]))
+    ndate = odate-timedelta(days=1)
+    date = re.sub('-', '', str(ndate)[0:10])
     date_regex = rf'{date}'
     arr = []
-    with open('thredds_urls.txt') as file:
+    with open(file) as file:
         lines = file.readlines()
         for line in lines:
             if re.findall(date_regex, line):
                 line = re.sub('\n', '', line)
                 arr.append(line)
     arr.sort()
+    if len(arr) == 4 or len(arr) == 1:
+        pass
+    else:
+        raise ValueError('Something happened, list of files does not contain all members.')
+
     return arr
 
 def correct_file(arr, member):
@@ -59,6 +70,24 @@ def correct_file(arr, member):
         _member = member - 18
     return file, _member
 
+def hour_adjustment(member):
+    '''
+        Adds hours to the file based one which member it is
+    Args: 
+        member  [int]   :   the member used
+    Returns:
+        addhour [int]   :   hours that are supposed to be added to the file
+    '''
+    if member >= 0 and member < 6:
+        addhour = 24
+    elif member >= 6 and member < 12:
+        addhour = 18
+    elif member >= 12 and member < 18:
+        addhour = 12
+    elif member >= 18 and member < 24:
+        addhour = 6
+    return addhour
+
 def name_from_lon_lat(lon,lat):
     '''
         Creates a string name created from given longitude and latitude
@@ -71,3 +100,8 @@ def name_from_lon_lat(lon,lat):
     name = f'lon{str(lon[0])}_{str(lon[1])}_lat{str(lat[0])}_{str(lat[1])}'
     name = re.sub('\.','-',name)
     return name
+
+if __name__ == '__main__':
+    arr = files_from_thredds('20220930', 'thredds_urls.txt')
+
+

@@ -23,7 +23,10 @@ def urls_to_data(url):
     mean_regex = r'catalog.*mean.*.nc'
     clean_regex = r'catalog\.html\?dataset\='
     files_regex = r'_files'
-    rep_str  = 'https://thredds.met.no/thredds/dodsC/fou-hi/'
+    if url == 'https://thredds.met.no/thredds/catalog/fou-hi/barents_eps_eps/catalog.html':
+        rep_str  = 'https://thredds.met.no/thredds/dodsC/fou-hi/'
+    elif url == 'https://thredds.met.no/thredds/catalog/barents25km_files/catalog.html':
+        rep_str = 'https://thredds.met.no/thredds/dodsC/'
     no_mean = []
 
     #filtering out mean data
@@ -32,20 +35,23 @@ def urls_to_data(url):
             no_mean.append(i)
     
     #changing name to thredds url and removing "_files"
+
     for i, j in enumerate(no_mean):
         tmp = re.sub(clean_regex, rep_str, j)
-        no_mean[i] = re.sub(files_regex, '', tmp)
+        if url == 'https://thredds.met.no/thredds/catalog/fou-hi/barents_eps_eps/catalog.html':
+            no_mean[i] = re.sub(files_regex, '', tmp)
+        else:
+            no_mean[i] = tmp
     
     return no_mean
 
-def save_to_file(list):
-    out = open('thredds_urls.txt','w')
+def save_to_file(list, name_of_file):
+    out = open(name_of_file,'w')
     for i in list:
         out.write(f'{i}\n')
 
-
 if __name__ == '__main__':
     urls = urls_to_data('https://thredds.met.no/thredds/catalog/fou-hi/barents_eps_eps/catalog.html')
-    save_to_file(urls)
-#https://thredds.met.no/thredds/dodsC/fou-hi/barents_eps_eps/barents_epsmean_20220421T18Z.nc.html
-#catalog.html?dataset=barents_eps_eps_files/barents_eps_20220419T18Z.nc
+    save_to_file(urls, 'thredds_urls.txt')
+    urls = urls_to_data('https://thredds.met.no/thredds/catalog/barents25km_files/catalog.html')
+    save_to_file(urls, 'old_barents.txt')

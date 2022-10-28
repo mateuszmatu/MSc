@@ -106,7 +106,7 @@ class animations:
             return LCS['ALCS']
         
         def advect_particles():
-            o = OceanDrift(loglevel=20)  # Set loglevel to 0 for debug information
+            o = OceanDrift(loglevel=30)  # Set loglevel to 0 for debug information
             o.set_config('environment:fallback:land_binary_mask', 0)
             o.set_config('drift:advection_scheme', 'runge-kutta4')
 
@@ -131,7 +131,7 @@ class animations:
             posx = pos['lon'][:,i]
             posy = pos['lat'][:,i]
             ax.clear()
-            ax.set_title(f'frame {i}/{self.frames}')
+            ax.set_title(f'Start: 1.8.2022 h12 \n Simulation time: {i} hours')
             ax.pcolormesh(in_x, in_y, x, cmap='jet')
             ax.scatter(posx, posy, s=5, color='black')
 
@@ -155,18 +155,20 @@ class animations:
         Parallel(n_jobs=self.jobs)(delayed(remove_files)(i) for i in range(self.frames))
 
 if __name__ == '__main__':
-    lon = [14.5,17.5]
-    lat = [67.5,70.25]
+    lon = [14,17.5]
+    lat = [69,70.25]
     time_step = 900
     duration = 1
     sep = 0.01
-    start_time=[2022,6,10,12] #no data before 2022 5 21 00, seems that it changes from day to day, deleting old dates ?
+    start_time=[2022,8,1,12] #no data before 2022 5 21 00, seems that it changes from day to day, deleting old dates ?
     # start time particle advection [2022,6,10,12], [2022,6,12,12]
     #def __init__(self, lon=None, lat=None, time_step=None, sep=None, dur=None, date=None, hours=None, frames=5, jobs=2):
     '''
     ani = animations(time_step=0.5, sep=0.02, dur=15, frames=40)
     ani.LCS_and_particle_advection_gyre(3, 23, 'new_test')
     '''
-    ani = animations(lon = lon, lat = lat, time_step = time_step, sep = sep, dur = duration, frames = 48)
-    ani.LCS_and_particle_advection(start_time=start_time, outfile='small_test2')
+    #Need to run particle_flow.py first
+    #Remember to change the title, maybe do it more general later
+    ani = animations(lon = lon, lat = lat, time_step = time_step, sep = sep, dur = duration, frames = 144)
+    ani.LCS_and_particle_advection(start_time=start_time, outfile='large_test')
     #LCS_and_particles_advection_animation('test', 48, lon, lat, start_time, time_step, duration, dxdy, LCS_start_time = 12)

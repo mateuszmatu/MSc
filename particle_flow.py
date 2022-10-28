@@ -1,5 +1,3 @@
-from venv import create
-from click import open_file
 from opendrift.readers import reader_netCDF_CF_generic
 from opendrift.models.oceandrift import OceanDrift
 import numpy as np
@@ -43,11 +41,11 @@ def advection_from_aggregated_file(lon, lat, time_step, dxdy, start_time = None,
     '''
     file = 'https://thredds.met.no/thredds/dodsC/fou-hi/barents_eps_zdepth_be'
 
-    o = OceanDrift(loglevel=20)
+    o = OceanDrift(loglevel=30)
     r = reader_netCDF_CF_generic.Reader(file)
     o.add_reader(r)
     x = np.arange(lon[0], lon[1], dxdy)
-    y = np.arange(lat[0], lat[1], dxdy)
+    y = np.arange(lat[0], lat[1], dxdy/2)
     lons, lats = np.meshgrid(x,y)
 
     if start_time is None:
@@ -62,6 +60,7 @@ def advection_from_aggregated_file(lon, lat, time_step, dxdy, start_time = None,
     duration = end_time - start_time
     o.seed_elements(lons.ravel(), lats.ravel(), time = start_time)
     o.run(duration = duration, time_step=time_step, outfile='particle_drift.nc')
+
 
 def velocity(lon, lat, date, member, step=2):
 
@@ -97,15 +96,14 @@ def velocity(lon, lat, date, member, step=2):
     
 
 if __name__ == '__main__':
-    lon = [14,17]
-    lat = [67.25,70]
+    lon = [15,17]
+    lat = [69.25,70]
 
     time_step = 3600
-    duration = 60*60*24*2
-    dxdy = 0.02
+    dxdy = 0.01
     #initiate_file_all_members(lon, lat, time_step, dxdy, duration, '20220420')
     #initiate_files_one_member(lon, lat, time_step, dxdy, duration, '20220419', 0)
-    advection_from_aggregated_file(lon, lat, time_step, dxdy, [2022,6,10,12], [2022,6,12,12])
+    advection_from_aggregated_file(lon, lat, time_step, dxdy, [2022,8,1,12], [2022,8,7,12])
     """
     for i in range(6):
         velocity(lon,lat,'20220530', i)
